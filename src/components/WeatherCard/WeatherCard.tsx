@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
+import "./WeatherCard.css";
+
+// Material UI Components
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
-import "WeatherCard.css";
+import Grid from "@mui/material/Grid";
 
 // Api
 import {
+  getWeatherIconSrc,
   fetchOpenWeatherData,
   OpenWeatherData,
   OpenWeatherTempScale,
@@ -28,17 +32,18 @@ const WeatherCardContainer: React.FC<{
               <Typography className="weatherCard-body">Delete</Typography>
             </Button>
           )}
-          {onDelete && <Button onClick={onDelete}>Delete</Button>}
         </CardActions>
       </Card>
     </Box>
   );
 };
 
+type WeatherCardState = "loading" | "error" | "ready";
+
 const WeatherCard: React.FC<{
   city: string;
   tempScale: OpenWeatherTempScale;
-  onDelete: () => void;
+  onDelete?: () => void;
 }> = ({ city, onDelete, tempScale }) => {
   const [weatherData, setWeatherData] = useState<OpenWeatherData | null>(null);
   const [cardState, setCardState] = useState<WeatherCardState>("loading");
@@ -49,21 +54,17 @@ const WeatherCard: React.FC<{
         setWeatherData(data);
         setCardState("ready");
       })
-      .then((data) => {
-        setWeatherData(data);
-      })
-
-      .catch((err) => setCardState(err));
+      .catch((err) => setCardState("error"));
   }, [city, tempScale]);
 
-  if (cardState === "loading" || cardState == "error") {
+  if (cardState == "loading" || cardState == "error") {
     return (
       <WeatherCardContainer onDelete={onDelete}>
         <Typography className="weatherCard-title">{city}</Typography>
         <Typography className="weatherCard-body">
           {cardState == "loading"
             ? "Loading..."
-            : "Error: Could not take information fo this city"}
+            : "Error: could not retrieve weather data for this city"}
         </Typography>
       </WeatherCardContainer>
     );
@@ -71,13 +72,33 @@ const WeatherCard: React.FC<{
 
   return (
     <WeatherCardContainer onDelete={onDelete}>
-      <Typography className="weatherCard-title">{weatherData.name}</Typography>
-      <Typography className="weatherCard-body">
-        {Math.round(weatherData.main.temp)}
-      </Typography>
-      <Typography className="weatherCard-body">
-        Feels like:{Math.round(weatherData.main.feels_like)}{" "}
-      </Typography>
+      <Grid container justifyContent="space-around">
+        <Grid item>
+          <Typography className="weatherCard-title">
+            {weatherData.name}
+          </Typography>
+          <Typography className="weatherCard-temp">
+            {Math.round(weatherData.main.temp)}
+          </Typography>
+          <Typography className="weatherCard-body">
+            Feels like: {Math.round(weatherData.main.feels_like)}
+          </Typography>
+          <Typography className="weatherCard-body">
+            Max: {Math.round(weatherData.main.temp_max)} || Min:{" "}
+            {Math.round(weatherData.main.temp_min)}
+          </Typography>
+        </Grid>
+        <Grid item>
+          {weatherData.weather.length > 0 && (
+            <>
+              <img alt={} src={getWeatherIconSrc(weatherData.weather[0].icon)} />
+              <Typography className="weatherCard-body">
+                {weatherData.weather[0].main}
+              </Typography>
+            </>
+          )}
+        </Grid>
+      </Grid>
     </WeatherCardContainer>
   );
 };

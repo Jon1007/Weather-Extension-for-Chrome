@@ -3,14 +3,14 @@ import ReactDOM from "react-dom";
 import "./popup.css";
 import WeatherCard from "../components/WeatherCard";
 
-//Material UI components
-import { Paper } from "@mui/material";
-import { InputBase } from "@mui/material";
-import { IconButton } from "@mui/material";
+// Material UI  Components
+import Paper from "@mui/material/Paper";
+import InputBase from "@mui/material/InputBase";
+import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box } from "@mui/material";
-import { Grid } from "@mui/material/Grid";
-import PictureInPictureIcon from "@mui/icons-material/PictureInPictureIcon";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import PictureInPictureIcon from "@mui/icons-material/PictureInPicture";
 
 // Utils
 import {
@@ -20,7 +20,7 @@ import {
   getStoredOptions,
   LocalStorageOptions,
 } from "../utils/storage";
-import {Message} from "@mui/icons-material";
+import { Message } from "../utils/message";
 
 const App: React.FC<{}> = () => {
   const [cities, setCities] = useState<string[]>([]);
@@ -56,25 +56,26 @@ const App: React.FC<{}> = () => {
       ...options,
       tempScale: options.tempScale === "metric" ? "imperial" : "metric",
     };
-    setStoredOptions(updateOptions).then(() => setOptions(updateOptions))
+    setStoredOptions(updateOptions).then(() => setOptions(updateOptions));
   };
 
   const handleOverlayButtonClick = () => {
-  chrome.tabs.query({
-    active:true
-  },(tabs) => {
-    if (tabs.length > 0) {
-      chrome.tabs.sendMessage(tabs[0].id,Message.TOGGLE_OVERLAY)
-    }
-  })
-  }
-}
+    chrome.tabs.query(
+      {
+        active: true,
+      },
+      (tabs) => {
+        if (tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id, Message.TOGGLE_OVERLAY);
+        }
+      }
+    );
+  };
 
   if (!options) {
     return null;
   }
 
-  // @ts-ignore
   return (
     <Box mx="8px" my="16px">
       <Grid container justifyContent="space-evenly">
@@ -94,7 +95,7 @@ const App: React.FC<{}> = () => {
         </Grid>
         <Grid item>
           <Paper>
-            <Box px="4px">
+            <Box py="4px">
               <IconButton onClick={handleTempScaleClick}>
                 {options.tempScale === "metric" ? "\u2103" : "\u2109"}
               </IconButton>
@@ -103,25 +104,27 @@ const App: React.FC<{}> = () => {
         </Grid>
         <Grid item>
           <Paper>
-            <Box px="6px">
+            <Box py="6px">
               <IconButton onClick={handleOverlayButtonClick}>
-<PictureInPictureIcon />
+                <PictureInPictureIcon />
               </IconButton>
             </Box>
           </Paper>
         </Grid>
       </Grid>
-      {options.homeCity != "" && <WeatherCard city={options.homeCity} tempScale={options.tempScale} onDelete={() =>{}}
-      {cities.map((city, idx) =>
-        (
+      {options.homeCity != "" && (
+        <WeatherCard city={options.homeCity} tempScale={options.tempScale} />
+      )}
+      {cities
+        .map((city, idx) => (
           <WeatherCard
-              tempScale={options.tempScale}
+            tempScale={options.tempScale}
             city={city}
             onDelete={() => handleCityDeleteClick(idx)}
             key={idx}
           />
-        ).reverse()
-      )}
+        ))
+        .reverse()}
       <Box height="16px" />
     </Box>
   );
